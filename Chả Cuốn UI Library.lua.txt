@@ -1,0 +1,12 @@
+local CNUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cha-Co-Gi/Cha-Co-Gi/refs/heads/main/Ch%E1%BA%A3%20Cu%E1%BB%91n%20UI%20Library"))()
+
+local MainTab = CNUI:CreateTab("Main")
+local SettingsTab = CNUI:CreateTab("Settings")
+
+MainTab:AddButton("Say Hello", function()
+    print("Hello!")
+end)
+
+SettingsTab:AddButton("Print Number", function()
+    print(123)
+end)
