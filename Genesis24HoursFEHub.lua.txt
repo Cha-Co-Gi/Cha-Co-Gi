@@ -1,0 +1,5 @@
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("Permission denied; you can no longer use this script.")
+task.wait(3)
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("Sorry. - C00l_Ch4os")
+task.wait(3)
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("You can use script again if you have source code before C00l_Ch4os locked 
