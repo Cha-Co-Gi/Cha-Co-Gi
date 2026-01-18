@@ -1,3 +1,5 @@
+-- // Credit to C00l_Ch4os
+
 game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("Genesis FE & 24 Hours FE Script - Hat - Rig | Just a baseplate | Made by C00l_Ch4os")
 
 local Players = game:GetService("Players")
@@ -1601,4 +1603,5 @@ Tabs.Misc:Button({
 
 Window:OnClose(function()
     print("Cha Co Gi Hub")
+
 end)
