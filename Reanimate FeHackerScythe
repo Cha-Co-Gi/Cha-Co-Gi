@@ -1,0 +1,325 @@
+-- Open Source
+-- Bad Script ;-;
+
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("-rs")
+task.wait(2)
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("-gh 18579926108 104813295721818 4995698441 119529735257237 132176245291157 107033715923108 87097041338434 134767106557537")
+task.wait(2)
+local lp = game:GetService("Players").LocalPlayer
+local hb = game:GetService("RunService").Heartbeat
+local rs = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
+local gen = game:GetService("TextChatService").TextChannels.RBXGeneral
+
+local char = lp.Character
+char.Archivable = true
+
+local parts = {}
+local cloneparts = {}
+local Sycthe = nil
+local isAttacking = false
+local attackCooldown = false
+local attackCount = 0
+local isSpinning = false
+local isDashing = false
+
+for _, v in pairs(char:GetDescendants()) do
+    if v:IsA("BasePart") then 
+        table.insert(parts, v) 
+        v.CanCollide = false
+    end
+    if v:IsA("Accessory") then
+        local handle = v:FindFirstChild("Handle")
+        if handle then
+            local mesh = handle:FindFirstChildOfClass("SpecialMesh")
+            if mesh and mesh.MeshId:find("129634653735052") then
+                Sycthe = handle
+                Sycthe:BreakJoints()
+                for _, obj in pairs(Sycthe:GetChildren()) do
+                    if obj:IsA("Weld") or obj:IsA("ManualWeld") or obj:IsA("WeldConstraint") then obj:Destroy() end
+                end
+                Sycthe.CanCollide = false
+            end
+        end
+    end
+end
+
+local clone = char:Clone()
+clone.Name = "Reanimate_Base"
+clone.Parent = workspace
+lp.Character = clone
+workspace.CurrentCamera.CameraSubject = clone
+
+for _, v in pairs(clone:GetDescendants()) do
+    if v:IsA("Accessory") then
+        local h = v:FindFirstChild("Handle")
+        if h then h.Transparency = 1 end
+    elseif v:IsA("BasePart") then
+        table.insert(cloneparts, v)
+    end
+end
+
+char.Humanoid:ChangeState(15)
+task.spawn(function()
+    local hrp = clone:WaitForChild("HumanoidRootPart")
+    for i = 1, 80 do
+        hrp.Velocity = Vector3.new(0, -35, 0)
+        hb:Wait()
+    end
+    gen:SendAsync("-net")
+end)
+
+local hum = clone:WaitForChild("Humanoid")
+local tor = clone:WaitForChild("Torso")
+local ra = clone:WaitForChild("Right Arm")
+local root = clone:WaitForChild("HumanoidRootPart")
+local joints = {
+    neck = tor:WaitForChild("Neck"),
+    rs = tor:WaitForChild("Right Shoulder"),
+    ls = tor:WaitForChild("Left Shoulder"),
+    rh = tor:WaitForChild("Right Hip"),
+    lh = tor:WaitForChild("Left Hip"),
+    root = root:WaitForChild("RootJoint")
+}
+
+local function cf(p, r)
+    return CFrame.new(p) * CFrame.fromEulerAnglesXYZ(math.rad(r.X), math.rad(r.Y), math.rad(r.Z))
+end
+
+local currentCFs = {}
+for n, j in pairs(joints) do currentCFs[n] = j.Transform end
+local SyctheCF = CFrame.new()
+local lerpSpeed = 0.15
+
+uis.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    
+    if input.KeyCode == Enum.KeyCode.Q and not isDashing and not attackCooldown then
+        isDashing = true
+        attackCooldown = true
+        local oldWS = hum.WalkSpeed
+        local oldJP = hum.JumpPower
+        hum.WalkSpeed = 0
+        hum.JumpPower = 0
+        
+        task.spawn(function()
+            task.wait(0.2)
+            local dashDir = root.CFrame.LookVector
+            local startTime = tick()
+            while tick() - startTime < 0.5 do
+                root.CFrame = root.CFrame + (dashDir * (30 / 0.5) * hb:Wait())
+            end
+            isDashing = false
+            hum.WalkSpeed = oldWS
+            hum.JumpPower = oldJP
+            task.wait(1.2)
+            attackCooldown = false
+        end)
+    end
+    
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        local startTime = tick()
+        local connection
+        connection = uis.InputEnded:Connect(function(endInput)
+            if endInput == input then
+                local duration = tick() - startTime
+                if duration < 0.25 then
+                    if tor.Velocity.Magnitude < 1 and not attackCooldown and not isAttacking and not isSpinning and not isDashing then
+                        attackCount = attackCount + 1
+                        if attackCount >= 4 then
+                            attackCount = 0
+                            isSpinning = true
+                            attackCooldown = true
+                            task.wait(2)
+                            isSpinning = false
+                            task.wait(1.2)
+                            attackCooldown = false
+                        else
+                            isAttacking = true
+                            attackCooldown = true
+                            task.spawn(function()
+                                task.wait(0.5)
+                                isAttacking = false
+                                task.wait(0.5)
+                                task.wait(0.2)
+                                attackCooldown = false
+                            end)
+                        end
+                    end
+                end
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
+
+rs.Stepped:Connect(function()
+    local state = "idle"
+    local vel = tor.Velocity.Magnitude
+    local hState = hum:GetState()
+    
+    local moveDir = root.CFrame:VectorToObjectSpace(hum.MoveDirection)
+    local forward = moveDir.Z < -0.1
+    local backward = moveDir.Z > 0.1
+    local left = moveDir.X < -0.1
+    local right = moveDir.X > 0.1
+
+    if isDashing then state = "dash"
+    elseif hState == Enum.HumanoidStateType.Climbing then state = "climb"
+    elseif hState == Enum.HumanoidStateType.Freefall then state = "fall"
+    elseif hState == Enum.HumanoidStateType.Jumping then state = "jump"
+    elseif hState == Enum.HumanoidStateType.Seated then state = "sit"
+    elseif vel > 0.1 then
+        if forward then state = "walkW"
+        elseif backward then state = "walkS"
+        elseif left then state = "walkA"
+        elseif right then state = "walkD"
+        else state = "walkW" end
+    end
+
+    local targets = {}
+    local Sycthe_data = {pos = Vector3.new(0, 0, 0), rot = Vector3.new(0, 0, 0)}
+    local rotCont = (tick() * 1500) % 360
+
+    if state == "dash" then
+        targets.root = cf(Vector3.new(0, -1.2, 0), Vector3.new(70, 0, 0))
+        targets.neck = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, -50))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, 50))
+        targets.rh = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, -50))
+        targets.lh = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, 50))
+        Sycthe_data.pos = Vector3.new(0, -5, 0)
+        Sycthe_data.rot = Vector3.new(90, 90, 45)
+    elseif isSpinning and state == "idle" then
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(10, 0, 0))
+        targets.neck = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, -0.5, 0.3), Vector3.new(-90, 0, 100))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, 40))
+        targets.rh = cf(Vector3.new(0, 0, 0), Vector3.new(-20, 0, -30))
+        targets.lh = cf(Vector3.new(0, 0, 0), Vector3.new(-20, 0, -30))
+        Sycthe_data.pos = Vector3.new(0, -2, 0)
+        Sycthe_data.rot = Vector3.new(rotCont, 90, 45)
+    elseif isAttacking and state == "idle" then
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.neck = cf(Vector3.new(0, 0, 0), Vector3.new(0, 20, 0))
+        targets.rs = cf(Vector3.new(0, -0.5, 0.3), Vector3.new(-90, 0, 130))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, -30))
+        Sycthe_data.pos = Vector3.new(0, -5, 0)
+        Sycthe_data.rot = Vector3.new(90, 90, 45)
+    elseif state == "idle" then
+        local s = math.sin(tick() * 2) * 5
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.neck = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, -0.5, 0.3), Vector3.new(-80, 0, 10+s))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, -10+s))
+        targets.rh = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, -10-s))
+        targets.lh = cf(Vector3.new(0, 0, 0), Vector3.new(-15, 0, -10-s))
+        Sycthe_data.pos = Vector3.new(0, -5, 0)
+        Sycthe_data.rot = Vector3.new(90, 90, 45)
+    elseif state == "walkW" then
+        local s = math.sin(tick() * 4) * 45
+        local s2 = math.sin(tick() * 2) * 5
+        local s3 = math.sin(tick() * 4) * 0.5
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(20, 0, 0))
+        targets.neck = cf(Vector3.new(0, 0, 0), Vector3.new(10, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 220+s2))
+        targets.ls = cf(Vector3.new(s3, 0, 0), Vector3.new(-15, 0, s))
+        targets.rh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        targets.lh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "walkS" then
+        local s = math.sin(tick() * 4) * 45
+        local s2 = math.sin(tick() * 2) * 5
+        local s3 = math.sin(tick() * 4) * 0.5
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(-20, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 220+s2))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-10+s2, 0, s2))
+        targets.rh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        targets.lh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "walkA" then
+        local s = math.sin(tick() * 4) * 45
+        local s2 = math.sin(tick() * 2) * 5
+        local s3 = math.sin(tick() * 4) * 0.5
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 15, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 220+s2))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-10+s2, 0, s2))
+        targets.rh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        targets.lh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "walkD" then
+        local s = math.sin(tick() * 4) * 45
+        local s2 = math.sin(tick() * 2) * 5
+        local s3 = math.sin(tick() * 4) * 0.5
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, -15, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 220+s2))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(-10+s2, 0, s2))
+        targets.rh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        targets.lh = cf(Vector3.new(-s3, 0, 0), Vector3.new(-15, 0, -s))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "jump" then
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "fall" then
+        local s = math.sin(tick() * 2) * 5
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 220+s))
+        targets.ls = cf(Vector3.new(0, 0, 0.5), Vector3.new(-70, 0, -15+s))
+        targets.rh = cf(Vector3.new(1, 0.3, 0), Vector3.new(-15, 0, -20-s))
+        targets.lh = cf(Vector3.new(-1, 0.3, 0), Vector3.new(-15, 0, 20-s))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "climb" then
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        Sycthe_data.pos = Vector3.new(0, -1, -2)
+        Sycthe_data.rot = Vector3.new(220, 90, 0)
+    elseif state == "sit" then
+        targets.root = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 0))
+        targets.rs = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 90))
+        targets.ls = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, -90))
+        targets.rh = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, 90))
+        targets.lh = cf(Vector3.new(0, 0, 0), Vector3.new(0, 0, -90))
+        Sycthe_data.pos = Vector3.new(-1.5, 1, 0)
+        Sycthe_data.rot = Vector3.new(90, 0, 180)
+    end
+
+    for n, target in pairs(targets) do
+        if joints[n] then
+            currentCFs[n] = currentCFs[n]:Lerp(target, lerpSpeed)
+            joints[n].Transform = currentCFs[n]
+        end
+    end
+    SyctheCF = SyctheCF:Lerp(CFrame.new(Sycthe_data.pos) * CFrame.fromEulerAnglesXYZ(math.rad(Sycthe_data.rot.X), math.rad(Sycthe_data.rot.Y), math.rad(Sycthe_data.rot.Z)), lerpSpeed)
+end)
+
+task.spawn(function()
+    while char.Parent == workspace do
+        for i, v in pairs(parts) do
+            if Sycthe and v == Sycthe then
+                v.CFrame = ra.CFrame * SyctheCF
+            elseif cloneparts[i] then
+                v.CFrame = cloneparts[i].CFrame
+            end
+            v.Velocity = Vector3.new(0, 35, 0)
+            v.CanCollide = false
+        end
+        hb:Wait()
+    end
+    if clone then clone:Destroy() end
+end)
+
+hum.WalkSpeed = 30
+hum.JumpPower = 50
+
+task.wait(2)
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("Fe Hacker Scythe Made By: C00l_Ch4os")
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("All Keybind: Q")
