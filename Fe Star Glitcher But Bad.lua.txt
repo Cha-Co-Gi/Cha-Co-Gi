@@ -1,9 +1,24 @@
+-- Open Source
+-- Testing Version?
+
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("Fe Star Glitcher But Bad Made By C00l_Ch4os")
+
+game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync("All Keybinds: Q to U, G, 8")
+
 local args = {
 	"cmd",
 	"-rs"
 }
 game:GetService("ReplicatedStorage"):WaitForChild("01_server"):FireServer(unpack(args))
 task.wait(2)
+
+local args = {
+	"cmd",
+	"-r6"
+}
+game:GetService("ReplicatedStorage"):WaitForChild("01_server"):FireServer(unpack(args))
+task.wait(2)
+
 local args = {
 	"cmd",
 	"-gh 97537548465301 103729080331161 73909724822248 131360314101084 118592065885475 107552883033977 93481657491286 133302673693864"
@@ -1047,4 +1062,5 @@ task.spawn(function()
 end)
 
 hum.WalkSpeed = 30
+
 hum.JumpPower = 70
