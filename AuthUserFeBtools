@@ -1,0 +1,11 @@
+local authorizedUsers = {
+    ["C00l_Ch4os"] = true,
+    ["Howie100100"] = true
+}
+
+local player67 = game.Players.LocalPlayer
+
+if not authorizedUsers[player67.Name] then
+    player67:Kick("Not Authorized To Use Private Script Fe Building Tools Made By C00l_Ch4os")
+    return
+end
