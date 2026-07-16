@@ -1,3 +1,46 @@
+local noya1 = game:GetService("Players")
+local noya2 = game:GetService("StarterGui")
+
+local noya3 = "https://discord.gg/Wm7jvZz9dU"
+
+local noya4 = setclipboard or toclipboard or (Clipboard and Clipboard.set)
+
+if noya4 then
+	noya4(noya3)
+else
+	local noya5 = noya1.LocalPlayer
+	local noya6 = Instance.new("ScreenGui")
+	noya6.Name = "CopyFallbackGui"
+	noya6.Parent = noya5:WaitForChild("PlayerGui")
+	
+	local noya7 = Instance.new("TextBox")
+	noya7.Size = UDim2.new(0, 1, 0, 1)
+	noya7.Position = UDim2.new(0, 0, 0, 0)
+	noya7.Text = noya3
+	noya7.ClearTextOnFocus = false
+	noya7.Parent = noya6
+	
+	noya7:CaptureFocus()
+	noya7.SelectionStart = 1
+	noya7.CursorPosition = #noya3 + 1
+end
+
+pcall(function()
+	noya2:SetCore("SendNotification", {
+		Title = "Pls join my discord",
+		Text = "Copied Discord Link",
+		Duration = 3
+	})
+end)
+
+pcall(function()
+	noya2:SetCore("SendNotification", {
+		Title = "The first notification discord link is got deleted by Clint (clint nuked my server)",
+		Text = "Copied Discord Link",
+		Duration = 3
+	})
+end)
+
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local TS = game:GetService("TweenService")
