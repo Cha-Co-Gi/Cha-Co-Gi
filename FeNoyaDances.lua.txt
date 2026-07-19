@@ -1,7 +1,7 @@
 local noya1 = game:GetService("Players")
 local noya2 = game:GetService("StarterGui")
 
-local noya3 = "https://discord.gg/Wm7jvZz9dU"
+local noya3 = "https://discord.gg/2QQg2QRxbx"
 
 local noya4 = setclipboard or toclipboard or (Clipboard and Clipboard.set)
 
@@ -28,14 +28,6 @@ end
 pcall(function()
 	noya2:SetCore("SendNotification", {
 		Title = "Pls join my discord",
-		Text = "Copied Discord Link",
-		Duration = 3
-	})
-end)
-
-pcall(function()
-	noya2:SetCore("SendNotification", {
-		Title = "The first notification discord link is got deleted by Clint (clint nuked my server)",
 		Text = "Copied Discord Link",
 		Duration = 3
 	})
